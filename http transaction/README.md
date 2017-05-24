@@ -82,5 +82,58 @@ request.on('error', function(err) {
 ```
 这里有其他方法去[处理这些错误](https://nodejs.org/api/errors.html)例如其他抽象概念或者工具,但是总是要意识到错误确实是会发生,而你要不得不处理他们.
 
-
+说了这么多
 ----
+在这个点上,我们已经知道了创建一个服务器,获取请求方法,请求方法,请求头和请求体.当我们在这些都放在一起,它可能会长这样.
+```javascript
+var http = require('http');
+
+http.createServer(function(request, response) {
+  var headers = request.headers;
+  var method = request.method;
+  var url = request.url;
+  var body = [];
+  request.on('error', function(err) {
+    console.error(err);
+  }).on('data', function(chunk) {
+    body.push(chunk);
+  }).on('end', function() {
+    body = Buffer.concat(body).toString();
+    // At this point, we have the headers, method, url and body, and can now
+    // do whatever we need to in order to respond to this request.
+  });
+}).listen(8080); // Activates this server, listening on port 8080.
+```
+
+如果我们运行这代码,我们将有能力去接收请求,但无法响应他们.事实上,如果你用浏览器上8080端口,你的请求将会time out,因为没有东西被发送给客户端.
+
+http 状态码
+-----
+
+如果你不去设置它,这响应的http状态码将永远是200.当然,不是每一个http响应都保证这一点,并且在某一情况你绝对会想发送一个不同的状态码.为了做到这个目的,你可以设置`statusCode`属性
+
+```javascript
+response.statusCode = 404; // Tell the client that the resource wasn't found.
+```
+这里还有一些别的捷径,稍后再说.
+
+设置响应头
+----
+
+响应头都是通过一个简便的方法叫做`setHeader`设置
+
+```javascript
+response.setHeader('Content-Type', 'application/json');
+response.setHeader('X-Powered-By', 'bacon');
+```
+
+当在response上设置请求头,要注意的情况是他们的名字.如果你重复设置同一个响应头,最后那个值是最终值.
+
+
+
+
+
+
+
+
+
