@@ -131,7 +131,124 @@ response.setHeader('X-Powered-By', 'bacon');
 
 
 
+发送响应体
+-----
 
+因为`response`对象是一个可写流,将响应体写入客户端只是一个平常的流方法使用.
+
+```javascript
+response.write('<html>');
+response.write('<body>');
+response.write('<h1>Hello, World!</h1>');
+response.write('</body>');
+response.write('</html>');
+response.end();
+```
+
+可写流的`end`方法也可以采用一些可选数据作为最后的流数据去发送,因此我们可以简化上述示例如下.
+
+```javascript
+response.end('<html><body><h1>Hello, World!</h1></body></html>');
+```
+      **注意: 在你开始写数据到响应体前先设置响应头与状态码是非常重要的，因为在http响应里是响应头比响应体先出现的,所以很重要.**
+ </br>
+ 另一个关于错误的quick thing
+ ----
+ `response`可写流也可以响应`error`事件,而且在某个时候你也将会需要处理它。所有对于`request`流的错误的建议也都适用于这里.
+ 
+总结一起
+----
+
+现在我们学习了关于http响应,我们将他它在一起.在之前的例子上构建,将创建一个服务器可以发送回用户发送给我们的数据.我们用JSON.stringify将格式化那数据成为JSON.
+
+```javascript
+var http = require('http');
+
+http.createServer(function(request, response) {
+  var headers = request.headers;
+  var method = request.method;
+  var url = request.url;
+  var body = [];
+  request.on('error', function(err) {
+    console.error(err);
+  }).on('data', function(chunk) {
+    body.push(chunk);
+  }).on('end', function() {
+    body = Buffer.concat(body).toString();
+    // BEGINNING OF NEW STUFF
+
+    response.on('error', function(err) {
+      console.error(err);
+    });
+
+    response.statusCode = 200;
+    response.setHeader('Content-Type', 'application/json');
+    // Note: the 2 lines above could be replaced with this next one:
+    // response.writeHead(200, {'Content-Type': 'application/json'})
+
+    var responseBody = {
+      headers: headers,
+      method: method,
+      url: url,
+      body: body
+    };
+
+    response.write(JSON.stringify(responseBody));
+    response.end();
+    // Note: the 2 lines above could be replaced with this next one:
+    // response.end(JSON.stringify(responseBody))
+
+    // END OF NEW STUFF
+  });
+}).listen(8080);
+```
+
+回声服务器例子
+----
+
+来简化之前的例子来建造一个简单的回声服务器,它是可以发送任何从请求中接受的数据到响应中。我们只需要从请求可读流中抓取数据并写入数据到响应可写流,类似我们之前做的那种.
+
+```javascript
+var http = require('http');
+
+http.createServer(function(request, response) {
+  var body = [];
+  request.on('data', function(chunk) {
+    body.push(chunk);
+  }).on('end', function() {
+    body = Buffer.concat(body).toString();
+    response.end(body);
+  });
+}).listen(8080);
+```
+
+现在我们来调整一下,我们只想在以下情况下发送回声:
+
+* 请求方法是GET
+* url是/echo
+
+在任何别的情况下,我们想要简单回应404.
+
+```javascript
+var http = require('http');
+
+http.createServer(function(request, response) {
+  if (request.method === 'GET' && request.url === '/echo') {
+    var body = [];
+    request.on('data', function(chunk) {
+      body.push(chunk);
+    }).on('end', function() {
+      body = Buffer.concat(body).toString();
+      response.end(body);
+    })
+  } else {
+    response.statusCode = 404;
+    response.end();
+  }
+}).listen(8080);
+```
+
+    **注意: 用这种**
 
 
 
