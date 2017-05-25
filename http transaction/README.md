@@ -248,7 +248,7 @@ http.createServer(function(request, response) {
 }).listen(8080);
 ```
 
-    **注意: 用这种方式去检查URL，我们其实在做路由选择的一种格式路由选择.其他格式的路由选择可以简单的像`switch`或者复杂的像一整个框架例如｀express｀** 
+    **注意: 用这种方式去检查URL，我们其实在做路由选择的一种格式路由选择.其他格式的路由选择可以简单的像`switch`或者复杂的像一整个框架例如`express`** 
     **如果你在寻找只可以做路由选择的东西,可以尝试router.**
 </br>
 
@@ -268,7 +268,44 @@ http.createServer(function(request, response) {
 ```
 耶！Stream
 
-我们
+我们还没真的把它完成.就像这章指南上提到的,错误随时会发生,我们需要去处理他们.
+
+为了处理请求可读流的错误,我们把错误打印到`stderr`(标准错误流)并发送一个400状态码以表明是一个`Bad Request`.在真实世界的程序,我们想要希望检查错误去知道对应的状态码和消息.像往常一样对待errors,你应该咨询关于[错误的文档](https://nodejs.org/api/errors.html).
+
+在响应上,我们只打印错误到`stdout`(标准输出流)
+
+```javascript
+var http = require('http');
+
+http.createServer(function(request, response) {
+  request.on('error', function(err) {
+    console.error(err);
+    response.statusCode = 400;
+    response.end();
+  });
+  response.on('error', function(err) {
+    console.error(err);
+  });
+  if (request.method === 'GET' && request.url === '/echo') {
+    request.pipe(response);
+  } else {
+    response.statusCode = 404;
+    response.end();
+  }
+}).listen(8080);
+```
+
+我们现在掌握到大部分关于处理HTTP请求的基础.这时,你应该可以:
+
+* 用请求处理方法实例化一个HTTP服务器,并用它监听某个端口.
+* 获取`request`对象的headers,URL,method和body data
+* 制造一个基于URL的路由选择和/或者关于`request`对象的其他数据
+* 通过`response`对象发送headers,HTTP状态码和body data
+* pipe数据从`request`对象到`response`对象
+* 处理`request`可读流和`response`可写流的流错误
+
+从这些基础上,可以构建用于许多典型用例的Node.js HTTP服务器.有很多其他东西都是这些api提供的,所以请一定要阅读下这些api文档[EventEmitters](https://nodejs.org/api/events.html),[Streams](https://nodejs.org/api/stream.html),[HTTP](https://nodejs.org/api/http.html).
+
 
 
 
