@@ -64,9 +64,8 @@ request.on('data', function(chunk) {
   // at this point, `body` has the entire request body stored in it as a string
 });
 ```
-    **注意 这看上去可能很乏味,而且在大多情况下,也真的是.幸运的是,这里在`npm`上有一些模块例如`concat-stream` 和
-    `body`可以帮助你隐藏一些逻辑.
-    在往下走之前,要了解what's going on?这是非常重要的,也就是为什么你会在这里.**
+    **注意 这看上去可能很乏味,而且在大多情况下,也真的是.幸运的是,这里在`npm`上有一些模块例如`concat-stream` 和`body`可以帮助你隐藏一些逻辑.**
+    **在往下走之前,要了解what's going on?这是非常重要的,也就是为什么你会在这里.**
 </br>
 关于错误的一些小东西
 ----
