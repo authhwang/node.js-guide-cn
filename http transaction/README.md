@@ -248,8 +248,27 @@ http.createServer(function(request, response) {
 }).listen(8080);
 ```
 
-    **注意: 用这种**
+    **注意: 用这种方式去检查URL，我们其实在做路由选择的一种格式路由选择.其他格式的路由选择可以简单的像`switch`或者复杂的像一整个框架例如｀express｀** 
+    **如果你在寻找只可以做路由选择的东西,可以尝试router.**
+</br>
 
+很好！现在让我们简化一下.记住,`request`对象是一个`可写流`然后`response`对象是一个`可写流`.这意外着我们可以使用`pipe`去导向数据从一个到另一个.等于完全就是我们想要的回声服务器！
+
+```javascript
+var http = require('http');
+
+http.createServer(function(request, response) {
+  if (request.method === 'GET' && request.url === '/echo') {
+    request.pipe(response);
+  } else {
+    response.statusCode = 404;
+    response.end();
+  }
+}).listen(8080);
+```
+耶！Stream
+
+我们
 
 
 
